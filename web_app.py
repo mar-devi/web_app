@@ -106,13 +106,12 @@ def index():
     session['some_var'] = "IRWA 2021 home"
 
     user_agent = request.headers.get('User-Agent')
-    print("Raw user browser:", user_agent) #Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+    print("Raw user browser:", user_agent) 
 
     user_ip = request.remote_addr
     agent = httpagentparser.detect(user_agent)
 
     print("Remote IP: {} - JSON user browser {}".format(user_ip, agent))
-    #Remote IP: 127.0.0.1 - JSON user browser {'platform': {'name': 'Mac OS', 'version': 'X 10.15.7'}, 'os': {'name': 'Macintosh'}, 'bot': False, 'flavor': {'name': 'MacOS', 'version': 'X 10.15.7'}, 'browser': {'name': 'Chrome', 'version': '131.0.0.0'}}
 
     #store user context (visitor)
 
