@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+    {{ page_title }}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-black">{{ page_title }}</h1>
+    <p class="lead text-black">
+        <strong>{{ found_counter }}</strong> resultados encontrados:
+    </p>
+    <hr>
+    {% for item in results_list %}
+    <div class="result-item mb-4 p-3 border rounded shadow-sm">
+        <h5 class="doc-title text-black">
+            <a href="{{ item.url }}" class="text-decoration-none text-black">{{ item.title }}</a>
+        </h5>
+        <small class="text-muted text-black">
+            <cite>
+                <a href="{{ item.url }}" class="text-black text-decoration-none">{{ item.url }}</a>
+            </cite>
+        </small>
+        <p class="doc-desc mt-2 text-black">
+            <em>{{ item.doc_date }}</em> — {{ item.description }}
+        </p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+

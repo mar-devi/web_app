@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block page_title %}Document Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Navigation</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Explicit "Go Back to Results" Button -->
+                    <a href="{{ url_for('search_form_post') }}?search_id={{ session['search_id'] }}&param2={{ session['param2'] }}" 
+                    class="btn btn-outline-secondary btn-block mb-2">
+                    ⬅️ Go Back to Results
+                    </a>
+                    <button class="btn btn-outline-secondary btn-block mb-2" onclick="history.go(-2)">⬅️ Go Back 2 Pages</button>
+                    <button class="btn btn-outline-secondary btn-block mb-2" onclick="history.go(-3)">⬅️ Go Back 3 Pages</button>
+                    <button class="btn btn-outline-secondary btn-block" onclick="history.go(-4)">⬅️ Go Back 4 Pages</button>
+                </div>
+                <hr>
+                <div class="card-body">
+                    <a href="/stats" class="btn btn-primary btn-block mb-2">📊 View Stats</a>
+                    <a href="/dashboard" class="btn btn-secondary btn-block">🏠 Go to Dashboard</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Document Details</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-muted">Here are the details for the document:</h6>
+                    <ul class="list-unstyled mt-3">
+                        <li><strong>Title:</strong> {{ doc.title }}</li>
+                        <li><strong>Description:</strong> {{ doc.description }}</li>
+                        <li><strong>Document Date:</strong> {{ doc.doc_date }}</li>
+                        <li><strong>Likes:</strong> {{ doc.likes }}</li>
+                        <li><strong>Retweets:</strong> {{ doc.retweets }}</li>
+                        <li><strong>URL:</strong> <a href="{{ doc.url }}" target="_blank">{{ doc.url }}</a></li>
+                        <li><strong>Hashtags:</strong> 
+                            {% if doc.hashtags %}
+                                {{ doc.hashtags | join(", ") }}
+                            {% else %}
+                                None
+                            {% endif %}
+                        </li>
+                     </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
