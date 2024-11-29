@@ -7,7 +7,7 @@ import nltk
 from flask import Flask, render_template, session
 from flask import request
 
-from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc
+from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc, SessionUser
 from myapp.search.load_corpus import load_corpus
 from myapp.search.objects import Document, StatsDocument
 from myapp.search.search_engine import SearchEngine
@@ -17,7 +17,7 @@ from flask import redirect, url_for
 import requests
 from datetime import datetime
 import json
-
+from datetime import datetime, timezone
 
 # *** for using method to_json in objects ***
 def _default(self, obj):
@@ -98,6 +98,7 @@ def get_country_and_city2(ip_address):
 # Home URL "/"
 @app.route('/')
 def index():
+    
     print("starting home url /...")
 
     # flask server creates a session by persisting a cookie in the user's browser.
@@ -105,18 +106,15 @@ def index():
     session['some_var'] = "IRWA 2021 home"
 
     user_agent = request.headers.get('User-Agent')
-    print("Raw user browser:", user_agent) #Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
-
+    print("Raw user browser:", user_agent) 
     user_ip = request.remote_addr
     agent = httpagentparser.detect(user_agent)
 
     print("Remote IP: {} - JSON user browser {}".format(user_ip, agent))
-    #Remote IP: 127.0.0.1 - JSON user browser {'platform': {'name': 'Mac OS', 'version': 'X 10.15.7'}, 'os': {'name': 'Macintosh'}, 'bot': False, 'flavor': {'name': 'MacOS', 'version': 'X 10.15.7'}, 'browser': {'name': 'Chrome', 'version': '131.0.0.0'}}
 
     #store user context (visitor)
-
     public_ip = get_public_ip()
-    country,city = get_country_and_city2(public_ip)
+    country,city = get_country_city(public_ip)
     #print("LOCATION:", country,city)
     current_time = datetime.now()
     current_date = current_time.date()
@@ -130,7 +128,6 @@ def index():
     session['time_of_day'] = time_of_day
     session['current_date'] = current_date
 
-    print(session)
 
     return render_template('index.html', page_title="Welcome")
 
@@ -144,7 +141,7 @@ def search_form_post():
     session['last_search_query'] = search_query
 
     search_id = analytics_data.save_query_terms(search_query)
-
+    session['last_search_id'] = search_id
     #results = search_engine.search(search_query, search_id, corpus,idf,tf,index_dic,tweet_popularity,map_docid_tweetid)
     results = search_engine.search(search_query, search_id, corpus)
 
@@ -153,6 +150,33 @@ def search_form_post():
     session['last_found_count'] = found_count
 
     print(session)
+
+    return render_template('results.html', results_list=results, page_title="Results", found_counter=found_count)
+
+
+@app.route('/search', methods=['GET'])
+def search_not_post():
+    
+    #print(f"click time now : {session['click_time']}")
+    
+    click_time_aware = session['click_time']
+    click_time_naive = click_time_aware.replace(tzinfo=None)
+    session['dwell_time'] =  (datetime.now() - click_time_naive).total_seconds()
+    print(f"Dwell time difference: {session['dwell_time']}")
+
+    if session['clicked_doc_id'] not in analytics_data.dwell_times:
+            analytics_data.dwell_times[session['clicked_doc_id']] = []
+
+    analytics_data.dwell_times[session['clicked_doc_id']].append(session['dwell_time'])
+    
+    print(analytics_data.dwell_times)
+
+    search_query = session["last_search_query"]
+    search_id = session['last_search_id']
+    print(search_query,search_id)
+    results = search_engine.search(search_query, search_id, corpus)
+
+    found_count = len(results)
 
     return render_template('results.html', results_list=results, page_title="Results", found_counter=found_count)
    
@@ -171,6 +195,12 @@ def doc_details():
 
     # get the query string parameters from request
     clicked_doc_id = request.args["id"]
+
+    session['clicked_doc_id'] = clicked_doc_id
+
+
+    session['click_time'] = datetime.now()
+
     p1 = int(request.args["search_id"])  # transform to Integer
     p2 = int(request.args["param2"])  # transform to Integer
     print("click in id={}".format(clicked_doc_id))
@@ -207,9 +237,14 @@ def stats():
     for doc_id in analytics_data.fact_clicks:
         row: Document = corpus[doc_id]
         count = analytics_data.fact_clicks[doc_id]
-        doc = StatsDocument(row.id, row.title, row.description, row.doc_date, row.url, count)
+        all_times_docid = analytics_data.dwell_times[doc_id]
+        avg_dwell_time = sum(all_times_docid) / len(all_times_docid) 
 
+        doc = StatsDocument(row.id, row.title, row.description, row.doc_date, row.url, count,avg_dwell_time )
+        
         docs.append(doc)
+
+    
 
     # simulate sort by ranking
     docs.sort(key=lambda doc: doc.count, reverse=True)
