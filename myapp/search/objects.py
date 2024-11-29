@@ -15,7 +15,7 @@ class Document:
         self.retweets = retweets
         self.url = url
         self.hashtags = hashtags
-
+        
     
     def to_json(self):
         return self.__dict__
@@ -31,7 +31,6 @@ class StatsDocument:
     """
     Original corpus data as an object
     """
-
     def __init__(self, id, title, description, doc_date, url, count):
         self.id = id
         self.title = title

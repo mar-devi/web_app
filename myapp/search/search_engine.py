@@ -17,6 +17,7 @@ from myapp.core.utils import load_pkl_file, load_csv_file
 import os
 
 from myapp.search.objects import ResultItem, Document
+from myapp.search.algorithms import search_in_corpus
 
 
 path_data = '/Users/uni/Documents/4upf/1trim/IR/final part/search-engine-web-app-main' + '/data'
@@ -128,7 +129,7 @@ def rank_documents_popularity(terms, docs):# index_dic, idf, tf,tweets_popularit
 
         cosine_similarity = np.dot(curDocVec, query_vector)
 
-        combined_score = 0.6 * cosine_similarity + 0.4 * popularity_score
+        combined_score = 0.5 * cosine_similarity + 0.5 * popularity_score
         doc_scores.append([doc,combined_score])
 
     #--------------
@@ -154,6 +155,7 @@ def search_in_corpus(corpus,search_id, query):  #index_dic, tf, idf, tweets_popu
     query = build_terms(query,'english')
     docs = set()
     i=0
+
     for term in query:
         try:
             # store in term_docs the ids of the docs that contain "term"
@@ -178,7 +180,7 @@ def search_in_corpus(corpus,search_id, query):  #index_dic, tf, idf, tweets_popu
     #tweet_id =  [map_docid_tweetid[key] for key in ranked_docs]
         
     results = []
-    for document,score in ranked_docs[:40]:
+    for document,score in ranked_docs:
         results.append(ResultItem(document, corpus[document].title, corpus[document].description, corpus[document].doc_date,
                               "doc_details?id={}&search_id={}&param2=2".format(document, search_id), score)) #cambiar a url
        
@@ -197,9 +199,6 @@ class SearchEngine:
         #results = build_demo_results(corpus, search_id)  # replace with call to search algorithm
         
         ##### your code here #####
-        #results = search_in_corpus(corpus,search_id,search_query, index_dic, tf, idf, tweet_popularity,map_docid_tweetid)
         results = search_in_corpus(corpus,search_id,search_query)
-        
-        #take var- #results conatin the numeration of doc
-        
+                
         return results

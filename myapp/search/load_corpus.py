@@ -67,6 +67,9 @@ def  _load_corpus_as_dataframe_farmer(path):
     # select only interesting columns
     filter_columns = ["Id", "Tweet", "Username", "Date", "Hashtags", "Likes", "Retweets", "Url", "Language"]
     corpus = corpus[filter_columns]
+
+    #username ?
+
     corpus['Date'] = pd.to_datetime(corpus['Date'], errors='coerce').dt.strftime('%Y-%m-%d %H:%M:%S')
 
     #print(corpus.head())
@@ -155,7 +158,7 @@ def load_tweets_as_dataframe3(json_data):
 def _row_to_doc_dict(row: pd.Series):
     #print(map_tweetid_docid[row["Id"]])
     doc_id = map_tweetid_docid[row['Id']]
-    _corpus[doc_id] = Document(row['Id'], row['Tweet'][0:100], row['Tweet'], row['Date'], row['Likes'],
+    _corpus[doc_id] = Document(doc_id, row['Tweet'][0:100], row['Tweet'], row['Date'], row['Likes'],
                                   row['Retweets'],
                                   row['Url'], row['Hashtags'])
     #print(_corpus[doc_id])

@@ -106,12 +106,13 @@ def index():
     session['some_var'] = "IRWA 2021 home"
 
     user_agent = request.headers.get('User-Agent')
-    print("Raw user browser:", user_agent) 
+    print("Raw user browser:", user_agent) #Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
 
     user_ip = request.remote_addr
     agent = httpagentparser.detect(user_agent)
 
     print("Remote IP: {} - JSON user browser {}".format(user_ip, agent))
+    #Remote IP: 127.0.0.1 - JSON user browser {'platform': {'name': 'Mac OS', 'version': 'X 10.15.7'}, 'os': {'name': 'Macintosh'}, 'bot': False, 'flavor': {'name': 'MacOS', 'version': 'X 10.15.7'}, 'browser': {'name': 'Chrome', 'version': '131.0.0.0'}}
 
     #store user context (visitor)
 
@@ -205,7 +206,7 @@ def stats():
     print('In stats section')
 
     for doc_id in analytics_data.fact_clicks:
-        row: Document = corpus[int(doc_id)]
+        row: Document = corpus[doc_id]
         count = analytics_data.fact_clicks[doc_id]
         doc = StatsDocument(row.id, row.title, row.description, row.doc_date, row.url, count)
 
@@ -223,14 +224,16 @@ def dashboard():
     visited_docs = []
     print(analytics_data.fact_clicks.keys())
     for doc_id in analytics_data.fact_clicks.keys():
-        d: Document = corpus[int(doc_id)]
+        d: Document = corpus[doc_id]
         doc = ClickedDoc(doc_id, d.description, analytics_data.fact_clicks[doc_id])
-        visited_docs.append(doc)
+        visited_docs.append(doc.to_dict())
 
     # simulate sort by ranking
-    visited_docs.sort(key=lambda doc: doc.counter, reverse=True)
+    visited_docs.sort(key=lambda doc: doc['counter'], reverse=True)
 
-    for doc in visited_docs: print(doc)
+    #for doc in visited_docs: print(doc)
+
+
     return render_template('dashboard.html', visited_docs=visited_docs)
 
 
