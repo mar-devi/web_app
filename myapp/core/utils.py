@@ -49,6 +49,18 @@ def load_csv_file(archivo):
     return data_dict
 
 
+def load_tweet_id_mapping():
+    full_path = os.path.realpath(__file__)
+    path, filename = os.path.split(full_path)
+    file_path = os.path.join(path, "../../data/tweet_document_ids_map.csv")
+    file_path = os.path.normpath(file_path)
+    
+    # Read the file once
+    tweet_document_ids_map = pd.read_csv(file_path)
+    
+    # Convert it to a dictionary for faster lookups
+    return dict(zip(tweet_document_ids_map["id"], tweet_document_ids_map["docId"]))
+
 
 def load_pkl_file(archivo):
     """
@@ -89,7 +101,7 @@ def load_json_file(archivo):
         #json_data = [json.loads(line.strip()) for line in fp]
     
 
-    json_data = pd.read_json(archivo, lines=True)
+    json_data = pd.read_json(archivo, lines=True, compression='gzip')
   
     # Parse the string into a JSON object
     #json_data = json.loads(text_data)

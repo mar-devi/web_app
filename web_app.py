@@ -49,14 +49,13 @@ full_path = os.path.realpath(__file__)
 path, filename = os.path.split(full_path)
 # print(path + ' --> ' + filename + "\n")
 # load documents corpus into memory.
-file_path = path + "/farmers-protest-tweets.json.gz"
+file_path = path + "/data/farmers-protest-tweets.json.gz"
 
 # file_path = "../../tweets-data-who.json"
 corpus = load_corpus(file_path)
 #print("loaded corpus. first elem:", list(corpus.values())[0])
 
 print("loaded corpus. first elem:", list(corpus.values())[0])
-path_data = '/Users/uni/Documents/4upf/1trim/IR/final part/search-engine-web-app-main' + '/data'
 map_docid_tweetid = load_csv_file( 'tweet_document_ids_map.csv')
 
 

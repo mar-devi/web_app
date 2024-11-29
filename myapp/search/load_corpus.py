@@ -1,14 +1,16 @@
 import pandas as pd
 
-from myapp.core.utils import load_json_file
+from myapp.core.utils import load_json_file, load_tweet_id_mapping
 from myapp.search.objects import Document
 from myapp.core.utils import  load_csv_file
 from typing import List
 
 _corpus = {}
 
-path_data = '/Users/uni/Documents/4upf/1trim/IR/final part/search-engine-web-app-main' + '/data'
-map_tweetid_docid = load_csv_file(path_data + '/tweet_document_ids_map.csv')
+# path_data = '/Users/uni/Documents/4upf/1trim/IR/final part/search-engine-web-app-main' + '/data'
+# map_tweetid_docid = load_csv_file(path_data + '/tweet_document_ids_map.csv')
+
+map_tweetid_docid = load_tweet_id_mapping()
 
 def load_corpus(path) -> List[Document]:
     """
