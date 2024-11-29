@@ -5,6 +5,7 @@ import pickle
 from faker import Faker
 import pandas as pd
 fake = Faker()
+import os
 
 
 # fake.date_between(start_date='today', end_date='+30d')
@@ -26,7 +27,7 @@ def get_random_date_in(start, end):
         # Get a random amount of seconds between `start` and `end`
         seconds=random.randint(0, int((end - start).total_seconds())), )
 
-def load_csv_file(path):
+def load_csv_file(archivo):
     '''
     Load a csv file from the given path and returns a dataframe
     
@@ -37,14 +38,19 @@ def load_csv_file(path):
     dataframe object
 
     '''
-    data = pd.read_csv(path)
+    full_path = os.path.realpath(__file__)
+    path, filename = os.path.split(full_path)
+    file_path = os.path.join(path, "../../data/")
+    file_path = os.path.join(file_path, archivo)
+    file_path = os.path.normpath(file_path)
+    data = pd.read_csv(file_path)
     data_dict = document_id_map = dict(zip(data['id'],data['docId']))
 
     return data_dict
 
 
 
-def load_pkl_file(path):
+def load_pkl_file(archivo):
     """
     Load a pickle file from the given path and return the deserialized object.
 
@@ -54,12 +60,17 @@ def load_pkl_file(path):
     Returns:
     object: The deserialized object stored in the pickle file.
     """
-    
-    with open(path, 'rb') as file:
+    full_path = os.path.realpath(__file__)
+    path, filename = os.path.split(full_path)
+    file_path = os.path.join(path, "../../data/")
+    file_path = os.path.join(file_path, archivo)
+    file_path = os.path.normpath(file_path)
+
+    with open(file_path, 'rb') as file:
         data = pickle.load(file)
     return data    
 
-def load_json_file(path):
+def load_json_file(archivo):
     """Load JSON content from file in 'path'
 
     Parameters:
@@ -78,7 +89,7 @@ def load_json_file(path):
         #json_data = [json.loads(line.strip()) for line in fp]
     
 
-    json_data = pd.read_json(path, lines=True)
+    json_data = pd.read_json(archivo, lines=True)
   
     # Parse the string into a JSON object
     #json_data = json.loads(text_data)

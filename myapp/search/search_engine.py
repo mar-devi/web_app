@@ -21,11 +21,11 @@ from myapp.search.algorithms import search_in_corpus
 
 
 path_data = '/Users/uni/Documents/4upf/1trim/IR/final part/search-engine-web-app-main' + '/data'
-idf = load_pkl_file(path_data + '/idf.pkl')
-tf = load_pkl_file(path_data + '/tf.pkl')
-index_dic = load_pkl_file(path_data + '/index.pkl')
-tweets_popularity = load_pkl_file(path_data + '/tweets_popularity.pkl')
-map_docid_tweetid = load_csv_file(path_data + '/tweet_document_ids_map.csv')
+idf = load_pkl_file('idf.pkl')
+tf = load_pkl_file('tf.pkl')
+index_dic = load_pkl_file('index.pkl')
+tweets_popularity = load_pkl_file('tweets_popularity.pkl')
+map_docid_tweetid = load_csv_file('tweet_document_ids_map.csv')
 
 
 def build_demo_results(corpus: dict, search_id):
