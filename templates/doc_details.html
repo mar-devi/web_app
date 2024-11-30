@@ -16,13 +16,11 @@
                     class="btn btn-outline-secondary btn-block mb-2">
                     ⬅️ Go Back to Results
                     </a>
-                    <button class="btn btn-outline-secondary btn-block mb-2" onclick="history.go(-2)">⬅️ Go Back Home</button>
-                    <!-- <button class="btn btn-outline-secondary btn-block mb-2" onclick="history.go(-3)">⬅️ Go Back 3 Pages</button> -->
-                    <!-- <button class="btn btn-outline-secondary btn-block" onclick="history.go(-4)">⬅️ Go Back 4 Pages</button> -->
-                    
-
+                    <!-- <a href="/" class="btn btn-outline-secondary btn-block mb-2">⬅️ Go Back Home</a> -->
+                    <!-- add stats and dashboard buttons -->
+                    <!-- <a href="/stats" class="btn btn-info btn-block mb-2">📊 View Stats</a> -->
+                    <!-- <a href="/dashboard" class="btn btn-success btn-block mb-2">🏠 Go to Dashboard</a> -->
                 </div>
-                <hr>
             </div>
         </div>
 
@@ -35,6 +33,7 @@
                 <div class="card-body">
                     <h6 class="text-muted">Here are the details for the document:</h6>
                     <ul class="list-unstyled mt-3">
+                        <li><strong>Id:</strong> {{doc.id}} </li>
                         <li><strong>Title:</strong> {{ doc.title }}</li>
                         <li><strong>Description:</strong> {{ doc.description }}</li>
                         <li><strong>Document Date:</strong> {{ doc.doc_date }}</li>

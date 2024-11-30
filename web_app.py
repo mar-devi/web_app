@@ -267,8 +267,14 @@ def dashboard():
 
     #for doc in visited_docs: print(doc)
 
+    query_stats = len(analytics_data.fact_request) # number of unique queries
+    queries_made = analytics_data.fact_request # unique queries
 
-    return render_template('dashboard.html', visited_docs=visited_docs)
+    unique_queries = []
+    for query in queries_made.keys():
+        unique_queries.append({"query": query, "count": queries_made[query]})
+
+    return render_template('dashboard.html', visited_docs=visited_docs, query_stats=query_stats, unique_queries=unique_queries)
 
 
 @app.route('/sentiment')

@@ -21,147 +21,213 @@
     - etc.
 
     -->
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Navigation</h5>
+                    </div>
+                    <div class="card-body">
+                        <a href="/" class="btn btn-outline-secondary btn-block mb-2">⬅️ Go Back Home</a>
+                        <a href="/stats" class="btn btn-info btn-block mb-2">📊 View Stats</a>
+                    </div>
+                </div>
+            </div>
 
     <script>
         // 'visited_docs' is the data coming from Python code.
         // load the python list in the JS variable 'visits_list':
         const visits_list = {{ visited_docs | tojson | safe }};
+        const queries_list = {{ unique_queries | tojson | safe }};
         console.log("visited docs: ")
         console.log(visits_list)
         
     </script>
+    <div class="col-md-9">
+        <h1>Dashboard</h1>
+            <h4>General stadistics</h4>
+            <ul>
+                <li><strong>Total unique queries made:</strong> {{query_stats}} </li>
+            </ul>
+            <h4>Ranking of Unique Queries</h4>
+            <!-- Add the missing canvas element -->
+            <canvas id="uniqueQueriesChart" width="400" height="400"></canvas>
 
-    <h5>Ranking of Visited Documents</h5>
-    <canvas id="dailyVisits" width="400" height="400"></canvas>
+            <script>
+                // Extract labels (queries) and data (counts) from queries_list
+                const queryLabels = queries_list.map(queryItem => queryItem.query);
+                const queryCounts = queries_list.map(queryItem => queryItem.count);
 
+                // Define chart data for unique queries
+                const queryChartData = {
+                    labels: queryLabels,
+                    datasets: [{
+                        label: 'Query Counts',
+                        data: queryCounts,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                };
 
-    <script>
-        // use JS map function top get just the tweet ids as labels
-        const visitsLabels = visits_list.map(a => "id: " + a.doc_id);
-        const visitsData = visits_list.map(a => a.counter);
-        const chartData1 = {
-            labels: visitsLabels,
-            datasets: [{
-                label: 'Visits count',
-                // data: [65, 59, 80, 81, 56, 55, 40],
-                data: visitsData,
-                fill: false,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
-        };
-
-        const ctx = document.getElementById('dailyVisits').getContext('2d');
-
-        // This will render the chart
-        const myChart = new Chart(ctx, {
-            type: 'line',
-            data: chartData1,
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
+                // Create the bar chart for unique queries
+                const uniqueQueriesCtx = document.getElementById('uniqueQueriesChart').getContext('2d');
+                const uniqueQueriesChart = new Chart(uniqueQueriesCtx, {
+                    type: 'bar',
+                    data: queryChartData,
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Ranking of Unique Queries'
+                            },
+                            legend: {
+                                display: true
+                            }
+                        }
                     }
-                }
-            }
-        });
+                });
+            </script>
 
-    </script>
+            <h4>Ranking of Visited Documents</h4>
+            <canvas id="dailyVisits" width="400" height="400"></canvas>
 
-    <hr>
-    <h5>Print Python data for verification with graph above...</h5>
-    {% for doc in visited_docs %}
-        <div class="pb-3">
-            <div class="">
-                <span class="text-dark"> ({{ doc.counter }} visits) </span> — id: {{ doc.doc_id }}
-                — {{ doc.description }}
-            </div>
+
+            <script>
+                // use JS map function top get just the tweet ids as labels
+                const visitsLabels = visits_list.map(a => "id: " + a.doc_id);
+                const visitsData = visits_list.map(a => a.counter);
+                const chartData1 = {
+                    labels: visitsLabels,
+                    datasets: [{
+                        label: 'Visits count',
+                        // data: [65, 59, 80, 81, 56, 55, 40],
+                        data: visitsData,
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                };
+
+                const ctx = document.getElementById('dailyVisits').getContext('2d');
+
+                // This will render the chart
+                const myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: chartData1,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+            </script>
+
+            <hr>
+            <h5>Print Python data for verification with graph above...</h5>
+            {% for doc in visited_docs %}
+                <div class="pb-3">
+                    <div class="">
+                        <span class="text-dark"> ({{ doc.counter }} visits) </span> — id: {{ doc.doc_id }}
+                        — {{ doc.description }}
+                    </div>
+                </div>
+                <hr>
+            {% endfor %}
+
+
+
+            <script>
+                // another example
+                const data2 = {
+                    labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                    datasets: [{
+                        label: '# of Votes',
+                        data: [12, 19, 3, 5, 2, 3],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                };
+
+                // This will render the chart
+                new Chart(document.getElementById("dailyVisits2"), {
+                    type: 'bar',
+                    data: {
+                        labels: myLabels,
+                        datasets: [{
+                            data: [1, 2, 3],
+                            label: "Alberta",
+                            borderColor: "#3e95cd",
+                            fill: false
+                        }, {
+                            data: [1, 2, 3],
+                            label: "BC",
+                            borderColor: "#8e5ea2",
+                            fill: false
+                        }, {
+                            data: [1, 2, 3],
+                            label: "Manitoba",
+                            borderColor: "#3cba9f",
+                            fill: false
+                        }, {
+                            data: [1, 2, 3],
+                            label: "New Brunswick",
+                            borderColor: "#e8c3b9",
+                            fill: false
+                        }, {
+                            data: [1, 2, 3],
+                            label: "NL",
+                            borderColor: "#c45850",
+                            fill: false
+                        }
+                        ]
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: 'Some title'
+                        },
+                        hover: {
+                            mode: 'index',
+                            intersect: true
+                        },
+                    }
+                });
+
+
+            </script>
+
+
+            <canvas id="dailyVisits2" width="400" height="400"></canvas>
         </div>
-        <hr>
-    {% endfor %}
-
-
-
-    <script>
-        // another example
-        const data2 = {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            datasets: [{
-                label: '# of Votes',
-                data: [12, 19, 3, 5, 2, 3],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        };
-
-        // This will render the chart
-        new Chart(document.getElementById("dailyVisits2"), {
-            type: 'bar',
-            data: {
-                labels: myLabels,
-                datasets: [{
-                    data: [1, 2, 3],
-                    label: "Alberta",
-                    borderColor: "#3e95cd",
-                    fill: false
-                }, {
-                    data: [1, 2, 3],
-                    label: "BC",
-                    borderColor: "#8e5ea2",
-                    fill: false
-                }, {
-                    data: [1, 2, 3],
-                    label: "Manitoba",
-                    borderColor: "#3cba9f",
-                    fill: false
-                }, {
-                    data: [1, 2, 3],
-                    label: "New Brunswick",
-                    borderColor: "#e8c3b9",
-                    fill: false
-                }, {
-                    data: [1, 2, 3],
-                    label: "NL",
-                    borderColor: "#c45850",
-                    fill: false
-                }
-                ]
-            },
-            options: {
-                title: {
-                    display: true,
-                    text: 'Some title'
-                },
-                hover: {
-                    mode: 'index',
-                    intersect: true
-                },
-            }
-        });
-
-
-    </script>
-
-
-    <canvas id="dailyVisits2" width="400" height="400"></canvas>
-
-
-
+    </div>
+</div>   
 {% endblock %}
 
 

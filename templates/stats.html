@@ -1,17 +1,37 @@
 {% extends "base.html" %}
 {% block page_title %}{{ page_title }}{% endblock %}
 {% block content %}
-    <h2>Quick Stats</h2>
-    <h4>Clicked docs:</h4>
-
-    {% for doc in clicks_data %}
-        <div class="pb-3">
-            <div class="">
-                <span class="text-dark"> ({{ doc.count }} visits) </span> — id: {{ doc.id }} — {{ doc.description }}
-                <br>
-                <span class="text-muted">Avg Dwell Time: {{ doc.avg_dwell_time}} seconds</span>
+<div class="container mt-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Navigation</h5>
+                </div>
+                <div class="card-body">
+                    <a href="/" class="btn btn-outline-secondary btn-block mb-2">⬅️ Go Back Home</a>
+                    <a href="/dashboard" class="btn btn-success btn-block mb-2">🏠 Go to Dashboard</a>
+                </div>
             </div>
         </div>
-        <hr>
-    {% endfor %}
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <h1>Quick Stats</h1>
+            <h4>Clicked docs:</h4>
+
+            {% for doc in clicks_data %}
+                <div class="pb-3">
+                    <div class="">
+                        <span class="text-dark"> ({{ doc.count }} visits) </span> — id: {{ doc.id }} — {{ doc.description }}
+                        <br>
+                        <span class="text-muted">Avg Dwell Time: {{ doc.avg_dwell_time}} seconds</span>
+                    </div>
+                </div>
+                <hr>
+            {% endfor %}
+        </div>  
+    </div>
+</div>
 {% endblock %}
