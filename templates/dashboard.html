@@ -40,12 +40,63 @@
         // 'visited_docs' is the data coming from Python code.
         // load the python list in the JS variable 'visits_list':
         const visits_list = {{ visited_docs | tojson | safe }};
+        const queries_list = {{ unique_queries | tojson | safe }};
         console.log("visited docs: ")
         console.log(visits_list)
         
     </script>
     <div class="col-md-9">
         <h1>Dashboard</h1>
+            <h4>General stadistics</h4>
+            <ul>
+                <li><strong>Total unique queries made:</strong> {{query_stats}} </li>
+            </ul>
+            <h4>Ranking of Unique Queries</h4>
+            <!-- Add the missing canvas element -->
+            <canvas id="uniqueQueriesChart" width="400" height="400"></canvas>
+
+            <script>
+                // Extract labels (queries) and data (counts) from queries_list
+                const queryLabels = queries_list.map(queryItem => queryItem.query);
+                const queryCounts = queries_list.map(queryItem => queryItem.count);
+
+                // Define chart data for unique queries
+                const queryChartData = {
+                    labels: queryLabels,
+                    datasets: [{
+                        label: 'Query Counts',
+                        data: queryCounts,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                };
+
+                // Create the bar chart for unique queries
+                const uniqueQueriesCtx = document.getElementById('uniqueQueriesChart').getContext('2d');
+                const uniqueQueriesChart = new Chart(uniqueQueriesCtx, {
+                    type: 'bar',
+                    data: queryChartData,
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Ranking of Unique Queries'
+                            },
+                            legend: {
+                                display: true
+                            }
+                        }
+                    }
+                });
+            </script>
+
             <h4>Ranking of Visited Documents</h4>
             <canvas id="dailyVisits" width="400" height="400"></canvas>
 
