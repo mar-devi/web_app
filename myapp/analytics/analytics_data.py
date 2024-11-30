@@ -8,22 +8,30 @@ class AnalyticsData:
     An in memory persistence object.
     Declare more variables to hold analytics tables.
     """
-    # statistics table 1
-    # fact_clicks is a dictionary with the click counters: key = doc id | value = click counter
-    fact_clicks = dict([])
+    def __init__(self):
+        self.fact_clicks = dict([]) # statistics table 1 - dictionary with the click counters: key = doc id | value = click counter
+        self.fact_session = dict([]) # statistics table 2
+        self.fact_request = dict([]) # statistics table 3
+        self.search_id_to_query = dict([]) # util dictionary to map query terms to request id
+        self.dwell_times = dict([]) 
+        self.fact_sessions = dict([])
 
-    # statistics table 2
-    fact_session = dict([])
+    def query_terms_to_request_id(self, terms: str) -> int: # same query terms has same request id
+        if terms in self.search_id_to_query.keys():
+            return self.search_id_to_query[terms] # return the request id
+        else:
+            return random.randint(0, 100000)
 
-    # statistics table 3
-    fact_request = dict([])
-
-    dwell_times = dict([])
-
-    fact_sessions = dict([])
     def save_query_terms(self, terms: str) -> int:
-        print(self)
-        return random.randint(0, 100000)
+        # fact_request should be a dict with key = query terms and value = times requested
+        if terms in self.fact_request.keys():
+            self.fact_request[terms] += 1
+        else:
+            self.fact_request[terms] = 1
+
+        # return a request id for the query term saved
+        request_id = self.query_terms_to_request_id(terms)
+        return request_id
 
 
 class ClickedDoc:
