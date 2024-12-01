@@ -238,19 +238,20 @@ def stats():
         row: Document = corpus[doc_id]
         count = analytics_data.fact_clicks[doc_id]
         all_times_docid = analytics_data.dwell_times[doc_id]
-        avg_dwell_time = sum(all_times_docid) / len(all_times_docid) 
 
-        doc = StatsDocument(row.id, row.title, row.description, row.doc_date, row.url, count,avg_dwell_time )
+        if len(all_times_docid) == 0: # handle division by zero
+            avg_dwell_time = 0
+        else:
+            avg_dwell_time = sum(all_times_docid) / len(all_times_docid) 
+
+        doc = StatsDocument(row.id, row.title, row.description, row.doc_date, row.url, count, avg_dwell_time)
         
         docs.append(doc)
-
-    
 
     # simulate sort by ranking
     docs.sort(key=lambda doc: doc.count, reverse=True)
 
     return render_template('stats.html', clicks_data=docs)
-    # ### End replace with your code ###
 
 
 @app.route('/dashboard', methods=['GET'])
