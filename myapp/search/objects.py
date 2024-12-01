@@ -31,7 +31,7 @@ class StatsDocument:
     """
     Original corpus data as an object
     """
-    def __init__(self, id, title, description, doc_date, url, count,avg_dwell_time):
+    def __init__(self, id, title, description, doc_date, url, count, avg_dwell_time, queries):
         self.id = id
         self.title = title
         self.description = description
@@ -39,6 +39,7 @@ class StatsDocument:
         self.url = url
         self.count = count
         self.avg_dwell_time = avg_dwell_time
+        self.queries = queries
 
     def __str__(self):
         """

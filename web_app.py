@@ -11,7 +11,7 @@ from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc, SessionUse
 from myapp.search.load_corpus import load_corpus
 from myapp.search.objects import Document, StatsDocument
 from myapp.search.search_engine import SearchEngine
-from myapp.core.utils import load_pkl_file, load_csv_file
+from myapp.core.utils import load_csv_file
 
 from flask import redirect, url_for
 import requests
@@ -164,13 +164,12 @@ def search_not_post():
     session['dwell_time'] =  (datetime.now() - click_time_naive).total_seconds()
     print(f"Dwell time difference: {session['dwell_time']}")
 
+    # handle dwell time for the clicked document
     if session['clicked_doc_id'] not in analytics_data.dwell_times:
             analytics_data.dwell_times[session['clicked_doc_id']] = []
 
     analytics_data.dwell_times[session['clicked_doc_id']].append(session['dwell_time'])
     
-    print(analytics_data.dwell_times)
-
     search_query = session["last_search_query"]
     search_id = session['last_search_id']
     print(search_query,search_id)
@@ -178,6 +177,17 @@ def search_not_post():
 
     found_count = len(results)
 
+    # for each doc in the results
+    # if the doc is clicked -> add its related search query (for stats)
+    for doc in results:
+        if doc.id == session['clicked_doc_id']:
+            if doc.id not in analytics_data.doc_to_queries:
+                analytics_data.doc_to_queries[doc.id] = []
+                analytics_data.doc_to_queries[doc.id].append(search_query)
+            else:
+                if search_query not in analytics_data.doc_to_queries[doc.id]:
+                    analytics_data.doc_to_queries[doc.id].append(search_query)
+    
     return render_template('results.html', results_list=results, page_title="Results", found_counter=found_count)
    
 
@@ -238,13 +248,14 @@ def stats():
         row: Document = corpus[doc_id]
         count = analytics_data.fact_clicks[doc_id]
         all_times_docid = analytics_data.dwell_times[doc_id]
+        queries = analytics_data.doc_to_queries[doc_id]
 
         if len(all_times_docid) == 0: # handle division by zero
             avg_dwell_time = 0
         else:
             avg_dwell_time = sum(all_times_docid) / len(all_times_docid) 
 
-        doc = StatsDocument(row.id, row.title, row.description, row.doc_date, row.url, count, avg_dwell_time)
+        doc = StatsDocument(row.id, row.title, row.description, row.doc_date, row.url, count, avg_dwell_time, queries)
         
         docs.append(doc)
 

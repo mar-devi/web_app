@@ -15,6 +15,7 @@ class AnalyticsData:
         self.search_id_to_query = dict([]) # util dictionary to map query terms to request id
         self.dwell_times = dict([]) 
         self.fact_sessions = dict([])
+        self.doc_to_queries = dict([])
 
     def query_terms_to_request_id(self, terms: str) -> int: # same query terms has same request id
         if terms in self.search_id_to_query.keys():

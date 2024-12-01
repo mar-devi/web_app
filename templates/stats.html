@@ -22,14 +22,25 @@
             <h4>Clicked docs:</h4>
 
             {% for doc in clicks_data %}
-                <div class="pb-3">
-                    <div class="">
-                        <span class="text-dark"> ({{ doc.count }} visits) </span> — id: {{ doc.id }} — {{ doc.description }}
-                        <br>
-                        <span class="text-muted">Avg Dwell Time: {{ doc.avg_dwell_time}} seconds</span>
+                <div class="card">
+                    <div class="card-body">
+                        <ul class="list-unstyled mt-3">
+                            <li><strong>Id:</strong> {{doc.id}} </li>
+                            <li><strong>Description:</strong> {{ doc.description }}</li>
+                            <hr/>
+                            <li><strong>Number of visits:</strong> {{ doc.count }}</li>
+                            <li><strong>Avg dwell time:</strong> {{ doc.avg_dwell_time }} seconds</li>
+                            <li><strong>Related queries:</strong> 
+                                {% if doc.queries %}
+                                    {{ doc.queries | join(", ") }}
+                                {% else %}
+                                    None
+                                {% endif %}
+                            </li>
+                        </ul>
                     </div>
                 </div>
-                <hr>
+                <br/>
             {% endfor %}
         </div>  
     </div>
