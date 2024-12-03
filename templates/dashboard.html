@@ -21,166 +21,283 @@
     - etc.
 
     -->
-    <div class="container mt-5">
-        <div class="row">
+<div class="container mt-5">
+    <div class="row">
             <!-- Sidebar Navigation -->
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Navigation</h5>
-                    </div>
-                    <div class="card-body">
-                        <a href="/" class="btn btn-outline-secondary btn-block mb-2">⬅️ Go Back Home</a>
-                        <a href="/stats" class="btn btn-info btn-block mb-2">📊 View Stats</a>
-                    </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Navigation</h5>
+                </div>
+                <div class="card-body">
+                    <a href="/" class="btn btn-outline-secondary btn-block mb-2">⬅️ Go Back Home</a>
+                    <a href="/stats" class="btn btn-info btn-block mb-2">📊 View Stats</a>
                 </div>
             </div>
-
-    <script>
-        // 'visited_docs' is the data coming from Python code.
-        // load the python list in the JS variable 'visits_list':
-        const visits_list = {{ visited_docs | tojson | safe }};
-        const queries_list = {{ unique_queries | tojson | safe }};
-        console.log("visited docs: ")
-        console.log(visits_list)
-        
-    </script>
-    <div class="col-md-9">
-        <h1>Dashboard</h1>
-            <h3>General stadistics</h3>
-            <ul>
-                <li><strong>Total unique queries made:</strong> {{query_stats}} </li>
-                <li><strong>Total searches:</strong> {{ total_searches }}</li>
-                <li><strong>Total unique visitors:</strong> {{ visitor_stats }}</li>
-                <li><strong>Total active sessions:</strong> {{ session_stats }}</li>
-            </ul>
-            <h3>Graphics</h3>
-            <h5>Ranking of Unique Queries</h5>
-            <!-- Add the missing canvas element -->
-            <canvas id="uniqueQueriesChart" width="400" height="400"></canvas>
-
-            <script>
-                // Extract labels (queries) and data (counts) from queries_list
-                const queryLabels = queries_list.map(queryItem => queryItem.query);
-                const queryCounts = queries_list.map(queryItem => queryItem.count);
-
-                // Define chart data for unique queries
-                const queryChartData = {
-                    labels: queryLabels,
-                    datasets: [{
-                        label: 'Query Counts',
-                        data: queryCounts,
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                };
-
-                // Create the bar chart for unique queries
-                const uniqueQueriesCtx = document.getElementById('uniqueQueriesChart').getContext('2d');
-                const uniqueQueriesChart = new Chart(uniqueQueriesCtx, {
-                    type: 'pie',
-                    data: queryChartData,
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        },
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Ranking of Unique Queries'
-                            },
-                            legend: {
-                                display: true
-                            }
-                        }
-                    }
-                });
-            </script>
-
-            <h5>Ranking of Visited Documents</h5>
-            <canvas id="dailyVisits" width="400" height="400"></canvas>
-
-
-            <script>
-                // use JS map function top get just the tweet ids as labels
-                const visitsLabels = visits_list.map(a => "id: " + a.doc_id);
-                const visitsData = visits_list.map(a => a.counter);
-                const chartData1 = {
-                    labels: visitsLabels,
-                    datasets: [{
-                        label: 'Visits count',
-                        // data: [65, 59, 80, 81, 56, 55, 40],
-                        data: visitsData,
-                        fill: false,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
-                    }]
-                };
-
-                const ctx = document.getElementById('dailyVisits').getContext('2d');
-
-                // This will render the chart
-                const myChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: chartData1,
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-
-            </script>
-            <h5>Browser Usage</h5>
-            <ul>
-                {% for browser, count in browser_distribution.items() %}
-                    <li>{{ browser }}: {{ count }}</li>
-                {% endfor %}
-            </ul>
-            <canvas id="browserChart" width="400" height="400"></canvas>
-            
-            <script>
-                const browserData = {{ browser_distribution | tojson | safe }};
-                const browserLabels = Object.keys(browserData);
-                const browserCounts = Object.values(browserData);
-
-                new Chart(document.getElementById('browserChart').getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: browserLabels,
-                        datasets: [{
-                            data: browserCounts,
-                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: { display: true, text: 'Browser Usage' }
-                        }
-                    }
-                });
-            </script>
-
-            <hr>
-            <h5>Debug: Data Overview</h5>
-            {% for doc in visited_docs %}
-                <div class="pb-3">
-                    <div class="">
-                        <span class="text-dark"> ({{ doc.counter }} visits) </span> — id: {{ doc.doc_id }}
-                        — {{ doc.description }}
+        </div>
+        <div class="col-md-9">
+            <h1>Dashboard</h1>
+                <h3>General stadistics</h3>
+                <ul>
+                    <li><strong>Total unique queries made:</strong> {{query_stats}} </li>
+                    <li><strong>Total searches:</strong> {{ total_searches }}</li>
+                    <li><strong>Total unique visitors:</strong> {{ visitor_stats }}</li>
+                    <li><strong>Total active sessions:</strong> {{ session_stats }}</li>
+                </ul>
+                <h3>Graphics</h3>
+                <!-- Row 1: Unique Queries and Visited Documents -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Ranking of Unique Queries</h5>
+                        <canvas id="uniqueQueriesChart" width="400" height="400"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Ranking of Visited Documents</h5>
+                    <canvas id="dailyVisits" width="400" height="400"></canvas>
                     </div>
                 </div>
                 <hr>
-            {% endfor %}
-
+                <!-- Row 2: Browser Usage and Operative Systems -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5>Browser Usage</h5>
+                        <canvas id="browserChart" width="400" height="400"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Operative Systems</h5>
+                        <canvas id="osChart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+                <hr>
+                <!-- Row 3: Countries and Cities -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5>Countries</h5>
+                        <canvas id="countriesChart" width="400" height="400"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Cities</h5>
+                        <canvas id="citiesChart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+                <hr>
+                <!-- Row 4: Search Time of the Day and Search Dates -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5>Search Time of the Day</h5>
+                        <canvas id="timeChart" width="400" height="400"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Search Dates</h5>
+                        <canvas id="datesChart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+                <hr>
         </div>
+        <script>
+            // 'visited_docs' is the data coming from Python code.
+            // load the python list in the JS variable 'visits_list':
+            const visits_list = {{ visited_docs | tojson | safe }};
+            const queries_list = {{ unique_queries | tojson | safe }};
+            console.log("visited docs: ")
+            console.log(visits_list)
+            
+        
+            // Extract labels (queries) and data (counts) from queries_list
+            const queryLabels = queries_list.map(queryItem => queryItem.query);
+            const queryCounts = queries_list.map(queryItem => queryItem.count);
+
+            // Define chart data for unique queries
+            const queryChartData = {
+                labels: queryLabels,
+                datasets: [{
+                    label: 'Query Counts',
+                    data: queryCounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            // Create the bar chart for unique queries
+            const uniqueQueriesCtx = document.getElementById('uniqueQueriesChart').getContext('2d');
+            const uniqueQueriesChart = new Chart(uniqueQueriesCtx, {
+                type: 'pie',
+                data: queryChartData,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Ranking of Unique Queries'
+                        },
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+       
+            // use JS map function top get just the tweet ids as labels
+            const visitsLabels = visits_list.map(a => "id: " + a.doc_id);
+            const visitsData = visits_list.map(a => a.counter);
+            const chartData1 = {
+                labels: visitsLabels,
+                datasets: [{
+                    label: 'Visits count',
+                    // data: [65, 59, 80, 81, 56, 55, 40],
+                    data: visitsData,
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            };
+
+            const ctx = document.getElementById('dailyVisits').getContext('2d');
+
+            // This will render the chart
+            const myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: chartData1,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            const browserData = {{ browser_distribution | tojson | safe }};
+            const browserLabels = Object.keys(browserData);
+            const browserCounts = Object.values(browserData);
+
+            new Chart(document.getElementById('browserChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: browserLabels,
+                    datasets: [{
+                        data: browserCounts,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: { display: true, text: 'Browser Usage' }
+                    }
+                }
+            });
+      
+            const osData = {{ os_distribution | tojson | safe }};//{ "Windows": 1 };
+            const osLabels = Object.keys(osData);
+            const osCounts = Object.values(osData);
+
+            new Chart(document.getElementById('osChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: osLabels,
+                    datasets: [{
+                        data: osCounts,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Horizontal bars
+                    plugins: { title: { display: true, text: 'Operative Systems' } }
+                }
+            });
+      
+            const countryData = {{ country_distribution | tojson | safe }};//{ "Spain": 1 };
+            const countryLabels = Object.keys(countryData);
+            const countryCounts = Object.values(countryData);
+
+            new Chart(document.getElementById('countriesChart').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: countryLabels,
+                    datasets: [{
+                        data: countryCounts,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                    }]
+                },
+                options: {
+                    plugins: { title: { display: true, text: 'Countries' } }
+                }
+            });
+      
+            const cityData = {{ city_distribution | tojson | safe }};
+            const cityLabels = Object.keys(cityData);
+            const cityCounts = Object.values(cityData);
+
+            new Chart(document.getElementById('citiesChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: cityLabels,
+                    datasets: [{
+                        data: cityCounts,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: { title: { display: true, text: 'Cities' } }
+                }
+            });
+        
+            const timeData = {{ time_of_day_stats | tojson | safe }};
+            const timeLabels = Object.keys(timeData);
+            const timeCounts = Object.values(timeData);
+
+            new Chart(document.getElementById('timeChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: timeLabels,
+                    datasets: [{
+                        data: timeCounts,
+                        borderColor: '#36A2EB',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    plugins: { title: { display: true, text: 'Search Time of the Day' } }
+                }
+            });
+      
+            const dateData = {{ date_stats | tojson | safe }};
+            const dateLabels = Object.keys(dateData);
+            const dateCounts = Object.values(dateData);
+
+            new Chart(document.getElementById('datesChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: dateLabels,
+                    datasets: [{
+                        data: dateCounts,
+                        backgroundColor: '#FF6384'
+                    }]
+                },
+                options: {
+                    plugins: { title: { display: true, text: 'Search Dates' } }
+                }
+            });
+        </script>             
+        <h5>Debug: Data Overview</h5>
+        {% for doc in visited_docs %}
+            <div class="pb-3">
+                <div class="">
+                    <span class="text-dark"> ({{ doc.counter }} visits) </span> — id: {{ doc.doc_id }}
+                    — {{ doc.description }}
+                </div>
+            </div>
+            <hr>
+        {% endfor %}    
     </div>
 </div>   
 {% endblock %}

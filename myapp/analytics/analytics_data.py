@@ -74,6 +74,8 @@ class SessionUser:
         self.dwell_time = None
         self.clicked_doc_id = None
         self.click_time = None
+        self.current_date = None
+        self.time_of_day = None
 
     @staticmethod
     def get_public_ip():
@@ -97,12 +99,14 @@ class SessionUser:
             return "Unknown", "Unknown"
 
 
-    def update_browser_data(self, browser, os, user_ip, country, city):
+    def update_browser_data(self, browser, os, user_ip, country, city,  current_date, time_of_day):
         self.browser = browser
         self.os = os
         self.user_ip = user_ip
         self.country = country
         self.city = city
+        self.current_date = current_date
+        self.time_of_day = time_of_day
 
     def update_search_data(self, search_query, search_id, found_count):
         self.last_search_query = search_query
@@ -129,5 +133,7 @@ class SessionUser:
             'last_found_count': self.last_found_count,
             'dwell_time': self.dwell_time,
             'clicked_doc_id': self.clicked_doc_id,
-            'click_time': self.click_time
+            'click_time': self.click_time,
+            'current_date': self.current_date,
+            'time_of_day': self.time_of_day
         }

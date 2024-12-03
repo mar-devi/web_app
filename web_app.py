@@ -115,7 +115,6 @@ def index():
     #store user context (visitor)
     public_ip = get_public_ip()
     country,city = get_country_city(public_ip)
-    #print("LOCATION:", country,city)
     current_time = datetime.now()
     current_date = current_time.date()
     time_of_day = current_time.strftime("%H:%M:%S")
@@ -124,7 +123,7 @@ def index():
     os = agent.get('os', {}).get('name', 'Unknown')
 
     session_user = SessionUser()
-    session_user.update_browser_data(browser, os, public_ip, country, city)
+    session_user.update_browser_data(browser, os, public_ip, country, city, str(current_date), time_of_day)
 
     # Guardar la información de la sesión en `fact_sessions`
     analytics_data.fact_sessions[session_id] = session_user
@@ -136,6 +135,7 @@ def index():
     session['city'] = city
     session['time_of_day'] = time_of_day
     session['current_date'] = current_date
+
 
     return render_template('index.html', page_title="Welcome")
 
@@ -288,12 +288,41 @@ def dashboard():
     total_searches = sum(analytics_data.fact_request.values())
     
     browser_distribution = {}
+    os_distribution = {}
+    country_distribution = {}
+    city_distribution = {}
+    time_of_day_stats = {}
+    date_stats = {}
     for user_session in analytics_data.fact_sessions.values():
         browser = user_session.browser
         if browser in browser_distribution:
             browser_distribution[browser] += 1
         else:
             browser_distribution[browser] = 1
+        
+        os = user_session.os
+        os_distribution[os] = os_distribution.get(os, 0) + 1
+
+        # Country distribution
+        country = user_session.country
+        country_distribution[country] = country_distribution.get(country, 0) + 1
+
+        # City distribution
+        city = user_session.city
+        city_distribution[city] = city_distribution.get(city, 0) + 1
+
+        # Time of day stats
+        time_of_day = user_session.to_dict().get('time_of_day', 'Unknown')
+        time_of_day_stats[time_of_day] = time_of_day_stats.get(time_of_day, 0) + 1
+
+        # Date stats
+        current_date = user_session.to_dict().get('current_date', 'Unknown')
+        date_stats[current_date] = date_stats.get(current_date, 0) + 1
+
+    browser_distribution = dict(sorted(browser_distribution.items(), key=lambda x: x[1], reverse=True))
+    os_distribution = dict(sorted(os_distribution.items(), key=lambda x: x[1], reverse=True))
+    country_distribution = dict(sorted(country_distribution.items(), key=lambda x: x[1], reverse=True))
+    city_distribution = dict(sorted(city_distribution.items(), key=lambda x: x[1], reverse=True))
 
     print("Browser distribution:", browser_distribution)
 
@@ -323,7 +352,12 @@ def dashboard():
                            session_stats=session_stats,
                            visited_docs=visited_docs, 
                            query_stats=query_stats, 
-                           unique_queries=unique_queries)
+                           unique_queries=unique_queries,
+                           os_distribution=os_distribution,
+                           country_distribution=country_distribution,
+                           city_distribution=city_distribution,
+                           time_of_day_stats=time_of_day_stats,
+                           date_stats=date_stats,)
 
 
 @app.route('/sentiment')
