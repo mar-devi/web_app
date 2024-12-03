@@ -136,6 +136,15 @@ def index():
     session['time_of_day'] = time_of_day
     session['current_date'] = current_date
 
+    # Log the HTTP request
+    analytics_data.log_http_request(
+        endpoint="/",
+        method=request.method,
+        status_code=200,  # Assuming success for simplicity
+        ip_address=user_ip,
+        timestamp=time_of_day,
+    )
+
 
     return render_template('index.html', page_title="Welcome")
 
@@ -165,6 +174,15 @@ def search_form_post():
     session['last_found_count'] = found_count
 
     print(session)
+
+    # Log the HTTP request
+    analytics_data.log_http_request(
+        endpoint="/search",
+        method=request.method,
+        status_code=200,  # Assuming success for simplicity
+        ip_address=session['user_ip'],
+        timestamp=session['time_of_day'],
+    )
 
     return render_template('results.html', results_list=results, page_title="Results", found_counter=found_count)
 
@@ -202,6 +220,15 @@ def search_not_post():
             else:
                 if search_query not in analytics_data.doc_to_queries[doc.id]:
                     analytics_data.doc_to_queries[doc.id].append(search_query)
+    
+    # Log the HTTP request
+    analytics_data.log_http_request(
+        endpoint="/search",
+        method=request.method,
+        status_code=200,  # Assuming success for simplicity
+        ip_address=session['user_ip'],
+        timestamp=session['time_of_day'],
+    )
     
     return render_template('results.html', results_list=results, page_title="Results", found_counter=found_count)
    
@@ -244,6 +271,15 @@ def doc_details():
     session['search_id'] = p1
     session['param2'] = p2
 
+    # Log the HTTP request
+    analytics_data.log_http_request(
+        endpoint="/doc_details",
+        method=request.method,
+        status_code=200,  # Assuming success for simplicity
+        ip_address=session['user_ip'],
+        timestamp=session['time_of_day'],
+    )
+
     return render_template('doc_details.html', doc= doc)
 
 
@@ -276,6 +312,15 @@ def stats():
 
     # simulate sort by ranking
     docs.sort(key=lambda doc: doc.count, reverse=True)
+
+    # Log the HTTP request
+    analytics_data.log_http_request(
+        endpoint="/stats",
+        method=request.method,
+        status_code=200,  # Assuming success for simplicity
+        ip_address=session['user_ip'],
+        timestamp=session['time_of_day'],
+    )
 
     return render_template('stats.html', clicks_data=docs)
 
@@ -354,6 +399,26 @@ def dashboard():
     for query in queries_made.keys():
         unique_queries.append({"query": query, "count": queries_made[query]})
 
+    # Log the HTTP request
+    request_id = analytics_data.log_http_request(
+        endpoint="/dahsboard",
+        method=request.method,
+        status_code=200,  # Assuming success for simplicity,
+        ip_address=session['user_ip'],
+        timestamp=session['time_of_day'],
+    )
+
+    all_requests = []
+    for request_id, request_data in analytics_data.http_requests.items():
+        all_requests.append({
+            "request_id": request_id,
+            "endpoint": request_data["endpoint"],
+            "method": request_data["method"],
+            "status_code": request_data["status_code"],
+            "ip_address": request_data["ip_address"],
+            "timestamp": request_data["timestamp"],
+        })
+
     return render_template('dashboard.html', 
                            browser_distribution=browser_distribution,
                            total_searches=total_searches,
@@ -367,7 +432,8 @@ def dashboard():
                            city_distribution=city_distribution,
                            time_of_day_stats=time_of_day_stats,
                            date_stats=date_stats,
-                           fact_sessions=fact_sessions)
+                           fact_sessions=fact_sessions,
+                           all_requests=all_requests,)
 
 
 @app.route('/sentiment')

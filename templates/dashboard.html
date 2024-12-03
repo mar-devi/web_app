@@ -307,31 +307,44 @@
                 }
             });
         </script>
-        <div>
-            <h5>Visitors Overview</h5>
-            {% for session in fact_sessions %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <span class="text-dark"> {{ session.user_ip }} - {{ session.browser }} - {{ session.os }} - {{ session.city }} - {{ session.country }} </span>
-                    </div>
-                </div>
-            {% endfor %}    
-            <br/>
-        </div>
-        <div>
-            <h5>Debug: Data Overview</h5>
-            {% for doc in visited_docs %}
-                <hr>
-                <div class="pb-3">
-                    <div class="">
-                        <span class="text-dark"> ({{ doc.counter }} visits) </span> — id: {{ doc.doc_id }}
-                        — {{ doc.description }}
-                    </div>
-                </div>
-                
-            {% endfor %}    
-        </div>             
     </div>
+    <div>
+        <h5>Debug: Data Overview</h5>
+        {% for doc in visited_docs %}
+            <hr>
+            <div class="pb-3">
+                <div class="">
+                    <span class="text-dark"> ({{ doc.counter }} visits) </span> — id: {{ doc.doc_id }}
+                    — {{ doc.description }}
+                </div>
+            </div>
+            
+        {% endfor %}    
+    </div>
+    <br/>  
+    <div>
+        <h5>Visitors Overview</h5>
+        {% for session in fact_sessions %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <span class="text-dark"> {{ session.user_ip }} - {{ session.browser }} - {{ session.os }} - {{ session.city }} - {{ session.country }} </span>
+                </div>
+            </div>
+        {% endfor %}    
+        <br/>
+    </div>
+    <div>
+        <h5>Last 5 Requests Overview</h5>
+        <ul class="list-group">
+            {% for request in all_requests[-5:] %}
+                <li class="list-group-item">
+                    {{ request.endpoint }} - {{ request.method }} - {{ request.timestamp }}
+                </li>
+            {% endfor %}
+        </ul>
+        <br/>
+    </div>
+              
 </div>   
 {% endblock %}
 

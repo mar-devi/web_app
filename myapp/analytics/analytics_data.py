@@ -16,7 +16,22 @@ class AnalyticsData:
         self.dwell_times = dict([]) 
         self.fact_sessions = dict([])
         self.doc_to_queries = dict([])
-        
+
+        # New attributes for HTTP analytics
+        self.http_requests = dict([])  # Tracks HTTP request data: key = request ID | value = request details
+
+    def log_http_request(self, endpoint, method, status_code, ip_address, timestamp):
+        """Log HTTP request details."""
+        request_id = random.randint(0, 100000)
+        self.http_requests[request_id] = {
+            "endpoint": endpoint,
+            "method": method,
+            "status_code": status_code,
+            "ip_address": ip_address,
+            "timestamp": timestamp
+        }
+        return request_id
+
     def query_terms_to_request_id(self, terms: str) -> int: # same query terms has same request id
         if terms in self.search_id_to_query.keys():
             return self.search_id_to_query[terms] # return the request id
