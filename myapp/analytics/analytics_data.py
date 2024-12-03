@@ -16,7 +16,7 @@ class AnalyticsData:
         self.dwell_times = dict([]) 
         self.fact_sessions = dict([])
         self.doc_to_queries = dict([])
-
+        
     def query_terms_to_request_id(self, terms: str) -> int: # same query terms has same request id
         if terms in self.search_id_to_query.keys():
             return self.search_id_to_query[terms] # return the request id
@@ -32,8 +32,7 @@ class AnalyticsData:
 
         # return a request id for the query term saved
         request_id = self.query_terms_to_request_id(terms)
-        return request_id
-
+        return request_id   
 
 class ClickedDoc:
     def __init__(self, doc_id, description, counter):

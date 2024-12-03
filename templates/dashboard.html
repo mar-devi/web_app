@@ -95,6 +95,7 @@
                 <hr>
         </div>
         <script>
+            
             // 'visited_docs' is the data coming from Python code.
             // load the python list in the JS variable 'visits_list':
             const visits_list = {{ visited_docs | tojson | safe }};
@@ -132,19 +133,14 @@
                         }
                     },
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Ranking of Unique Queries'
-                        },
-                        legend: {
-                            display: true
-                        }
+                        title: { display: true, text: 'Distinctive queries made'},
+                        legend: { display: true }
                     }
                 }
             });
        
             // use JS map function top get just the tweet ids as labels
-            const visitsLabels = visits_list.map(a => "id: " + a.doc_id);
+            const visitsLabels = visits_list.map(a => a.doc_id);
             const visitsData = visits_list.map(a => a.counter);
             const chartData1 = {
                 labels: visitsLabels,
@@ -153,8 +149,7 @@
                     // data: [65, 59, 80, 81, 56, 55, 40],
                     data: visitsData,
                     fill: false,
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
                 }]
             };
 
@@ -169,6 +164,10 @@
                         y: {
                             beginAtZero: true
                         }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Visits per documents'},
+                        legend: { display: false }
                     }
                 }
             });
@@ -189,7 +188,8 @@
                 options: {
                     responsive: true,
                     plugins: {
-                        title: { display: true, text: 'Browser Usage' }
+                        title: { display: true, text: 'Prefered browsers for searching' },
+                        legend: { display: false }
                     }
                 }
             });
@@ -204,12 +204,17 @@
                     labels: osLabels,
                     datasets: [{
                         data: osCounts,
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
                     }]
                 },
                 options: {
                     indexAxis: 'y', // Horizontal bars
-                    plugins: { title: { display: true, text: 'Operative Systems' } }
+                    plugins: { 
+                        title: { display: true, text: 'Operative Systems used for searches' },
+                        legend: { display: false}    
+                    }
+
                 }
             });
       
@@ -223,11 +228,15 @@
                     labels: countryLabels,
                     datasets: [{
                         data: countryCounts,
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
                     }]
                 },
                 options: {
-                    plugins: { title: { display: true, text: 'Countries' } }
+                    plugins: { 
+                        title: { display: true, text: 'Countries where searches are performed' },
+                        legend: {display: true}
+                    }
                 }
             });
       
@@ -246,7 +255,10 @@
                 },
                 options: {
                     indexAxis: 'y',
-                    plugins: { title: { display: true, text: 'Cities' } }
+                    plugins: { 
+                        title: { display: true, text: 'Cities where searches are performed' },
+                        legend: {display: false}
+                }
                 }
             });
         
@@ -260,13 +272,16 @@
                     labels: timeLabels,
                     datasets: [{
                         data: timeCounts,
-                        borderColor: '#36A2EB',
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        //borderColor: '#36A2EB',
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
                         fill: true
                     }]
                 },
                 options: {
-                    plugins: { title: { display: true, text: 'Search Time of the Day' } }
+                    plugins: { 
+                        title: { display: true, text: 'People searching per hour' },
+                        legend: {display: false}
+                    }
                 }
             });
       
@@ -280,24 +295,31 @@
                     labels: dateLabels,
                     datasets: [{
                         data: dateCounts,
-                        backgroundColor: '#FF6384'
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
                     }]
                 },
                 options: {
-                    plugins: { title: { display: true, text: 'Search Dates' } }
+                    plugins: { 
+                        title: { display: true, text: 'People searching per day' },
+                        legend: {display: false}
+                    }
                 }
             });
-        </script>             
-        <h5>Debug: Data Overview</h5>
-        {% for doc in visited_docs %}
-            <div class="pb-3">
-                <div class="">
-                    <span class="text-dark"> ({{ doc.counter }} visits) </span> — id: {{ doc.doc_id }}
-                    — {{ doc.description }}
+        </script>
+        <div>
+            <h5>Debug: Data Overview</h5>
+            {% for doc in visited_docs %}
+                <hr>
+                <div class="pb-3">
+                    <div class="">
+                        <span class="text-dark"> ({{ doc.counter }} visits) </span> — id: {{ doc.doc_id }}
+                        — {{ doc.description }}
+                    </div>
                 </div>
-            </div>
-            <hr>
-        {% endfor %}    
+                
+            {% endfor %}    
+        </div>             
     </div>
 </div>   
 {% endblock %}

@@ -313,7 +313,11 @@ def dashboard():
 
         # Time of day stats
         time_of_day = user_session.to_dict().get('time_of_day', 'Unknown')
-        time_of_day_stats[time_of_day] = time_of_day_stats.get(time_of_day, 0) + 1
+        if time_of_day != 'Unknown':
+            hour = int(time_of_day.split(':')[0])  # Extract the hour
+            grouped_hour = f"{hour:02d}:00-{hour:02d}:59"  # Create the interval
+            time_of_day_stats[grouped_hour] = time_of_day_stats.get(grouped_hour, 0) + 1
+        # time_of_day_stats[time_of_day] = time_of_day_stats.get(time_of_day, 0) + 1
 
         # Date stats
         current_date = user_session.to_dict().get('current_date', 'Unknown')
