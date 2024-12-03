@@ -10,6 +10,11 @@
     text-align: center;
 }
 
+.header a {
+    text-decoration: none; /* Elimina el subrayado */
+    color: inherit; /* Hereda el color del texto, para no usar el color por defecto de los enlaces */
+}
+
 /*.btn-primary {*/
 /*    background-color: #c8102e;*/
 /*    border: #c8102e;*/

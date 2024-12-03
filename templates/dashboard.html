@@ -47,11 +47,15 @@
     </script>
     <div class="col-md-9">
         <h1>Dashboard</h1>
-            <h4>General stadistics</h4>
+            <h3>General stadistics</h3>
             <ul>
                 <li><strong>Total unique queries made:</strong> {{query_stats}} </li>
+                <li><strong>Total searches:</strong> {{ total_searches }}</li>
+                <li><strong>Total unique visitors:</strong> {{ visitor_stats }}</li>
+                <li><strong>Total active sessions:</strong> {{ session_stats }}</li>
             </ul>
-            <h4>Ranking of Unique Queries</h4>
+            <h3>Graphics</h3>
+            <h5>Ranking of Unique Queries</h5>
             <!-- Add the missing canvas element -->
             <canvas id="uniqueQueriesChart" width="400" height="400"></canvas>
 
@@ -75,7 +79,7 @@
                 // Create the bar chart for unique queries
                 const uniqueQueriesCtx = document.getElementById('uniqueQueriesChart').getContext('2d');
                 const uniqueQueriesChart = new Chart(uniqueQueriesCtx, {
-                    type: 'bar',
+                    type: 'pie',
                     data: queryChartData,
                     options: {
                         responsive: true,
@@ -97,7 +101,7 @@
                 });
             </script>
 
-            <h4>Ranking of Visited Documents</h4>
+            <h5>Ranking of Visited Documents</h5>
             <canvas id="dailyVisits" width="400" height="400"></canvas>
 
 
@@ -121,7 +125,7 @@
 
                 // This will render the chart
                 const myChart = new Chart(ctx, {
-                    type: 'line',
+                    type: 'doughnut',
                     data: chartData1,
                     options: {
                         scales: {
@@ -133,9 +137,39 @@
                 });
 
             </script>
+            <h5>Browser Usage</h5>
+            <ul>
+                {% for browser, count in browser_distribution.items() %}
+                    <li>{{ browser }}: {{ count }}</li>
+                {% endfor %}
+            </ul>
+            <canvas id="browserChart" width="400" height="400"></canvas>
+            
+            <script>
+                const browserData = {{ browser_distribution | tojson | safe }};
+                const browserLabels = Object.keys(browserData);
+                const browserCounts = Object.values(browserData);
+
+                new Chart(document.getElementById('browserChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: browserLabels,
+                        datasets: [{
+                            data: browserCounts,
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: { display: true, text: 'Browser Usage' }
+                        }
+                    }
+                });
+            </script>
 
             <hr>
-            <h5>Print Python data for verification with graph above...</h5>
+            <h5>Debug: Data Overview</h5>
             {% for doc in visited_docs %}
                 <div class="pb-3">
                     <div class="">
@@ -146,85 +180,6 @@
                 <hr>
             {% endfor %}
 
-
-
-            <script>
-                // another example
-                const data2 = {
-                    labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-                    datasets: [{
-                        label: '# of Votes',
-                        data: [12, 19, 3, 5, 2, 3],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                            'rgba(255, 206, 86, 0.2)',
-                            'rgba(75, 192, 192, 0.2)',
-                            'rgba(153, 102, 255, 0.2)',
-                            'rgba(255, 159, 64, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                };
-
-                // This will render the chart
-                new Chart(document.getElementById("dailyVisits2"), {
-                    type: 'bar',
-                    data: {
-                        labels: myLabels,
-                        datasets: [{
-                            data: [1, 2, 3],
-                            label: "Alberta",
-                            borderColor: "#3e95cd",
-                            fill: false
-                        }, {
-                            data: [1, 2, 3],
-                            label: "BC",
-                            borderColor: "#8e5ea2",
-                            fill: false
-                        }, {
-                            data: [1, 2, 3],
-                            label: "Manitoba",
-                            borderColor: "#3cba9f",
-                            fill: false
-                        }, {
-                            data: [1, 2, 3],
-                            label: "New Brunswick",
-                            borderColor: "#e8c3b9",
-                            fill: false
-                        }, {
-                            data: [1, 2, 3],
-                            label: "NL",
-                            borderColor: "#c45850",
-                            fill: false
-                        }
-                        ]
-                    },
-                    options: {
-                        title: {
-                            display: true,
-                            text: 'Some title'
-                        },
-                        hover: {
-                            mode: 'index',
-                            intersect: true
-                        },
-                    }
-                });
-
-
-            </script>
-
-
-            <canvas id="dailyVisits2" width="400" height="400"></canvas>
         </div>
     </div>
 </div>   

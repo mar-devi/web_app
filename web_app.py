@@ -1,11 +1,11 @@
 import os
 from json import JSONEncoder
-
-# pip install httpagentparser
-import httpagentparser  # for getting the user agent as json
+import uuid
+import httpagentparser 
 import nltk
-from flask import Flask, render_template, session
-from flask import request
+from flask import Flask, render_template, session, request, redirect, url_for
+import requests
+from datetime import datetime, timezone
 
 from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc, SessionUser
 from myapp.search.load_corpus import load_corpus
@@ -13,11 +13,6 @@ from myapp.search.objects import Document, StatsDocument
 from myapp.search.search_engine import SearchEngine
 from myapp.core.utils import load_csv_file
 
-from flask import redirect, url_for
-import requests
-from datetime import datetime
-import json
-from datetime import datetime, timezone
 
 # *** for using method to_json in objects ***
 def _default(self, obj):
@@ -105,6 +100,11 @@ def index():
     # the 'session' object keeps data between multiple requests
     session['some_var'] = "IRWA 2021 home"
 
+    if 'session_id' not in session:
+        session['session_id'] = str(uuid.uuid4()) 
+    session_id = session['session_id']
+    print(f"Session ID: {session_id}")
+
     user_agent = request.headers.get('User-Agent')
     print("Raw user browser:", user_agent) 
     user_ip = request.remote_addr
@@ -120,6 +120,15 @@ def index():
     current_date = current_time.date()
     time_of_day = current_time.strftime("%H:%M:%S")
 
+    browser = agent.get('browser', {}).get('name', 'Unknown')
+    os = agent.get('os', {}).get('name', 'Unknown')
+
+    session_user = SessionUser()
+    session_user.update_browser_data(browser, os, public_ip, country, city)
+
+    # Guardar la información de la sesión en `fact_sessions`
+    analytics_data.fact_sessions[session_id] = session_user
+
     session['browser'] = agent['browser'] #['name']
     session['os'] = agent['os']['name']
     session['user_ip'] = public_ip
@@ -127,7 +136,6 @@ def index():
     session['city'] = city
     session['time_of_day'] = time_of_day
     session['current_date'] = current_date
-
 
     return render_template('index.html', page_title="Welcome")
 
@@ -142,8 +150,15 @@ def search_form_post():
 
     search_id = analytics_data.save_query_terms(search_query)
     session['last_search_id'] = search_id
-    #results = search_engine.search(search_query, search_id, corpus,idf,tf,index_dic,tweet_popularity,map_docid_tweetid)
+    
+    session_user_data = session.get('user', {})
+    session_user = SessionUser()
+    session_user.__dict__.update(session_user_data)
+
     results = search_engine.search(search_query, search_id, corpus)
+
+    session_user.update_search_data(search_query, search_id, len(results))
+    session['user'] = session_user.to_dict()
 
     print("Desde busqueda el sear_id es : ",search_id)
     found_count = len(results)
@@ -267,17 +282,32 @@ def stats():
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-    visited_docs = []
-    print(analytics_data.fact_clicks.keys())
-    for doc_id in analytics_data.fact_clicks.keys():
-        d: Document = corpus[doc_id]
-        doc = ClickedDoc(doc_id, d.description, analytics_data.fact_clicks[doc_id])
-        visited_docs.append(doc.to_dict())
 
-    # simulate sort by ranking
+    visitor_stats = len(analytics_data.fact_sessions)
+    session_stats = sum(1 for session_user in analytics_data.fact_sessions.values() if session_user)
+    total_searches = sum(analytics_data.fact_request.values())
+    
+    browser_distribution = {}
+    for user_session in analytics_data.fact_sessions.values():
+        browser = user_session.browser
+        if browser in browser_distribution:
+            browser_distribution[browser] += 1
+        else:
+            browser_distribution[browser] = 1
+
+    print("Browser distribution:", browser_distribution)
+
+    # visited_docs = []
+    # print(analytics_data.fact_clicks.keys())
+    # for doc_id in analytics_data.fact_clicks.keys():
+    #     d: Document = corpus[doc_id]
+    #     doc = ClickedDoc(doc_id, d.description, analytics_data.fact_clicks[doc_id])
+    #     visited_docs.append(doc.to_dict())
+    visited_docs = [
+        ClickedDoc(doc_id, corpus[doc_id].description, analytics_data.fact_clicks[doc_id]).to_dict()
+        for doc_id in analytics_data.fact_clicks.keys()
+    ]
     visited_docs.sort(key=lambda doc: doc['counter'], reverse=True)
-
-    #for doc in visited_docs: print(doc)
 
     query_stats = len(analytics_data.fact_request) # number of unique queries
     queries_made = analytics_data.fact_request # unique queries
@@ -286,7 +316,14 @@ def dashboard():
     for query in queries_made.keys():
         unique_queries.append({"query": query, "count": queries_made[query]})
 
-    return render_template('dashboard.html', visited_docs=visited_docs, query_stats=query_stats, unique_queries=unique_queries)
+    return render_template('dashboard.html', 
+                           browser_distribution=browser_distribution,
+                           total_searches=total_searches,
+                           visitor_stats=visitor_stats,
+                           session_stats=session_stats,
+                           visited_docs=visited_docs, 
+                           query_stats=query_stats, 
+                           unique_queries=unique_queries)
 
 
 @app.route('/sentiment')
