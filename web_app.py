@@ -293,6 +293,11 @@ def dashboard():
     city_distribution = {}
     time_of_day_stats = {}
     date_stats = {}
+    fact_sessions = []
+
+    for user_session in analytics_data.fact_sessions.values():
+        fact_sessions.append(user_session.to_dict())
+
     for user_session in analytics_data.fact_sessions.values():
         browser = user_session.browser
         if browser in browser_distribution:
@@ -361,7 +366,8 @@ def dashboard():
                            country_distribution=country_distribution,
                            city_distribution=city_distribution,
                            time_of_day_stats=time_of_day_stats,
-                           date_stats=date_stats,)
+                           date_stats=date_stats,
+                           fact_sessions=fact_sessions)
 
 
 @app.route('/sentiment')

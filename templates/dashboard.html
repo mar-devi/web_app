@@ -308,6 +308,17 @@
             });
         </script>
         <div>
+            <h5>Visitors Overview</h5>
+            {% for session in fact_sessions %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <span class="text-dark"> {{ session.user_ip }} - {{ session.browser }} - {{ session.os }} - {{ session.city }} - {{ session.country }} </span>
+                    </div>
+                </div>
+            {% endfor %}    
+            <br/>
+        </div>
+        <div>
             <h5>Debug: Data Overview</h5>
             {% for doc in visited_docs %}
                 <hr>
