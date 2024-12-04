@@ -62,6 +62,91 @@ def load_tweet_id_mapping():
     return dict(zip(tweet_document_ids_map["id"], tweet_document_ids_map["docId"]))
 
 
+import csv
+import csv
+import ast
+
+def load_analytics_info_dwell(file_path):
+    """
+    Carga un archivo CSV con columnas 'Key' y 'Value' donde 'Value' es una cadena que representa una lista de números.
+
+    Args:
+        file_path (str): Ruta al archivo CSV.
+
+    Returns:
+        dict: Diccionario donde las claves son 'Key' y los valores son listas de números.
+    """
+    analytics_dict = {}
+
+    try:
+        # Abrir el archivo CSV
+        with open(file_path, mode='r', encoding='utf-8') as file:
+            reader = csv.reader(file)
+            
+            # Leer la primera fila como encabezado
+            header = next(reader)
+            if header != ['Key', 'Value']:
+                raise ValueError("El archivo CSV debe tener columnas 'Key' y 'Value'.")
+            
+            # Leer las filas y construir el diccionario
+            for row in reader:
+                key = row[0]
+                value = row[1]
+
+                # Convertir el valor de texto que representa una lista a una lista real
+                try:
+                    value_list = ast.literal_eval(value)  # Convierte la cadena a una lista
+                    if isinstance(value_list, list):  # Verificar que sea una lista
+                        analytics_dict[key] = value_list
+                    else:
+                        raise ValueError(f"El valor para {key} no es una lista válida.")
+                except (ValueError, SyntaxError) as e:
+                    print(f"Error al procesar el valor para {key}: {e}")
+
+    except FileNotFoundError:
+        print(f"Error: No se encontró el archivo en la ruta '{file_path}'.")
+    except Exception as e:
+        print(f"Ha ocurrido un error inesperado: {e}")
+
+    return analytics_dict
+
+def load_analytics_info(file_path):
+    """
+    Carga un archivo CSV con columnas 'Key' y 'Value' en un diccionario.
+
+    Args:
+        file_path (str): Ruta al archivo CSV.
+
+    Returns:
+        dict: Diccionario con los datos del CSV (clave = Key, valor = Value).
+    """
+    analytics_dict = {}
+
+    try:
+        # Abrir el archivo CSV
+        with open(file_path, mode='r', encoding='utf-8') as file:
+            reader = csv.reader(file)
+            
+            # Leer la primera fila como encabezado
+            header = next(reader)
+            if header != ['Key', 'Value']:
+                raise ValueError("El archivo CSV debe tener columnas 'Key' y 'Value'.")
+            
+            # Leer las filas y construir el diccionario
+            for row in reader:
+                key = row[0]
+                value = int(row[1])  # Convertir el valor a entero
+                analytics_dict[key] = value
+
+    except FileNotFoundError:
+        print(f"Error: No se encontró el archivo en la ruta '{file_path}'.")
+    except ValueError as e:
+        print(f"Error en el formato del archivo CSV: {e}")
+    except Exception as e:
+        print(f"Ha ocurrido un error inesperado: {e}")
+
+    return analytics_dict
+
 def load_pkl_file(archivo):
     """
     Load a pickle file from the given path and return the deserialized object.

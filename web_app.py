@@ -9,9 +9,8 @@ from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc, SessionUse
 from myapp.search.load_corpus import load_corpus
 from myapp.search.objects import Document, StatsDocument
 from myapp.search.search_engine import SearchEngine
-from myapp.core.utils import load_csv_file
-import shutil
-
+from myapp.core.utils import load_csv_file , load_analytics_info,load_analytics_info_dwell #, load_analytics_info_dq #, load_analytics_info_queries
+import requests
 
 # *** for using method to_json in objects ***
 def _default(self, obj):
@@ -52,7 +51,14 @@ corpus = load_corpus(file_path)
 print("loaded corpus. first elem:", list(corpus.values())[0])
 map_docid_tweetid = load_csv_file( 'tweet_document_ids_map.csv')
 
+#loading analytics
 
+analytics_data.fact_clicks = load_analytics_info(path + "/analytics_data/fact_clicks.csv")
+analytics_data.dwell_times = load_analytics_info_dwell(path + "/analytics_data/dwell_times.csv")
+analytics_data.doc_to_queries = load_analytics_info_dwell(path + "/analytics_data/doc_to_queries.csv")
+
+for key, value in analytics_data.doc_to_queries.items():
+    print(f"Key: {key}, Value: {value}")
 
 def get_public_ip():
     try:
@@ -299,7 +305,6 @@ def stats():
         count = analytics_data.fact_clicks[doc_id]
         all_times_docid = analytics_data.dwell_times[doc_id]
         queries = analytics_data.doc_to_queries[doc_id]
-
         if len(all_times_docid) == 0: # handle division by zero
             avg_dwell_time = 0
         else:
@@ -428,39 +433,11 @@ def dashboard():
                            fact_sessions=fact_sessions,
                            all_requests=all_requests,)
 
-# Route to export all analytics data to a single CSV file
-@app.route('/export-all-analytics', methods=['GET'])
-def export_all_analytics():
-    folder_name = "analytics_data"
-    if not os.path.exists(folder_name):
-        os.makedirs(folder_name)  # Create the folder if it doesn't exist
-
-    filename = os.path.join(folder_name, "analytics_data.csv")  # Save in the folder
-    analytics_data.export_to_csv(filename)
-    
-    return send_file(filename, as_attachment=True)
-
-# Route to export a ZIP file with all analytics data in separate CSV files
 @app.route('/export-analytics', methods=['GET'])
-def export_analytics_zip():
-    folder_name = "analytics_data"
-    zip_filename = "analytics_exports.zip"
-
-    try:
-        # Export analytics data to separate CSV files
-        analytics_data.export_to_different_csv(folder=folder_name)
-
-        # Create a ZIP file of the folder
-        shutil.make_archive(folder_name, 'zip', folder_name)
-
-        # Send the ZIP file as a downloadable attachment
-        return send_file(f"{folder_name}.zip", as_attachment=True)
-    except Exception as e:
-        return {"error": f"An error occurred during export: {e}"}, 500
-    finally:
-        # Clean up the generated ZIP file (optional, keep it if required for future downloads)
-        if os.path.exists(f"{folder_name}.zip"):
-            os.remove(f"{folder_name}.zip")
+def export_analytics():
+    filename = "analytics_data.csv"
+    analytics_data.export_to_csv(filename)
+    return send_file(filename, as_attachment=True)
 
 @app.route('/sentiment')
 def sentiment_form():
