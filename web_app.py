@@ -428,17 +428,22 @@ def dashboard():
                            fact_sessions=fact_sessions,
                            all_requests=all_requests,)
 
-# to export all analytics data to a CSV file
+# Route to export all analytics data to a single CSV file
 @app.route('/export-all-analytics', methods=['GET'])
-def export_analytics():
-    filename = "analytics_data.csv"
+def export_all_analytics():
+    folder_name = "analytics_data"
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)  # Create the folder if it doesn't exist
+
+    filename = os.path.join(folder_name, "analytics_data.csv")  # Save in the folder
     analytics_data.export_to_csv(filename)
+    
     return send_file(filename, as_attachment=True)
 
-# to export a zip file with all analytics data in separate CSV files
+# Route to export a ZIP file with all analytics data in separate CSV files
 @app.route('/export-analytics', methods=['GET'])
-def export_analytics():
-    folder_name = "analytics_exports"
+def export_analytics_zip():
+    folder_name = "analytics_data"
     zip_filename = "analytics_exports.zip"
 
     try:
