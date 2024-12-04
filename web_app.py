@@ -3,10 +3,8 @@ from json import JSONEncoder
 import uuid
 import httpagentparser 
 import nltk
-from flask import Flask, render_template, session, request, redirect, url_for
-import requests
-from datetime import datetime, timezone
-
+from flask import Flask, render_template, session, request, send_file
+from datetime import datetime
 from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc, SessionUser
 from myapp.search.load_corpus import load_corpus
 from myapp.search.objects import Document, StatsDocument
@@ -380,12 +378,6 @@ def dashboard():
 
     print("Browser distribution:", browser_distribution)
 
-    # visited_docs = []
-    # print(analytics_data.fact_clicks.keys())
-    # for doc_id in analytics_data.fact_clicks.keys():
-    #     d: Document = corpus[doc_id]
-    #     doc = ClickedDoc(doc_id, d.description, analytics_data.fact_clicks[doc_id])
-    #     visited_docs.append(doc.to_dict())
     visited_docs = [
         ClickedDoc(doc_id, corpus[doc_id].description, analytics_data.fact_clicks[doc_id]).to_dict()
         for doc_id in analytics_data.fact_clicks.keys()
@@ -435,6 +427,11 @@ def dashboard():
                            fact_sessions=fact_sessions,
                            all_requests=all_requests,)
 
+@app.route('/export-analytics', methods=['GET'])
+def export_analytics():
+    filename = "analytics_data.csv"
+    analytics_data.export_to_csv(filename)
+    return send_file(filename, as_attachment=True)
 
 @app.route('/sentiment')
 def sentiment_form():
@@ -449,7 +446,6 @@ def sentiment_form_post():
     sid = SentimentIntensityAnalyzer()
     score = ((sid.polarity_scores(str(text)))['compound'])
     return render_template('sentiment.html', score=score)
-
 
 if __name__ == "__main__":
     app.run(port=8088, host="0.0.0.0", threaded=False, debug=True)

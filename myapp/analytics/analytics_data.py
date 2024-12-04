@@ -2,6 +2,7 @@ import json
 import random
 from datetime import datetime, timezone
 import requests
+import csv
 
 class AnalyticsData:
     """
@@ -19,6 +20,54 @@ class AnalyticsData:
 
         # New attributes for HTTP analytics
         self.http_requests = dict([])  # Tracks HTTP request data: key = request ID | value = request details
+    
+    def export_to_csv(self, filename="analytics_data.csv"):
+        """
+        Exports analytics data to a CSV file.
+        :param filename: Name of the file to save the CSV.
+        """
+        try:
+            with open(filename, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                
+                # Write header
+                writer.writerow(["Type", "Key", "Value"])
+                
+                # Write fact_clicks
+                for key, value in self.fact_clicks.items():
+                    writer.writerow(["fact_clicks", key, value])
+                
+                # Write fact_session
+                for key, value in self.fact_session.items():
+                    writer.writerow(["fact_session", key, value])
+                
+                # Write fact_request
+                for key, value in self.fact_request.items():
+                    writer.writerow(["fact_request", key, value])
+                
+                # Write search_id_to_query
+                for key, value in self.search_id_to_query.items():
+                    writer.writerow(["search_id_to_query", key, value])
+                
+                # Write dwell_times
+                for key, value in self.dwell_times.items():
+                    writer.writerow(["dwell_times", key, value])
+                
+                # Write fact_sessions
+                for session_id, session_user in self.fact_sessions.items():
+                    writer.writerow(["fact_sessions", session_id, json.dumps(session_user.to_dict())])
+
+                # Write doc_to_queries
+                for key, value in self.doc_to_queries.items():
+                    writer.writerow(["doc_to_queries", key, value])
+                
+                # Write http_requests
+                for key, value in self.http_requests.items():
+                    writer.writerow(["http_requests", key, value])
+            
+            print(f"Analytics data successfully exported to {filename}.")
+        except Exception as e:
+            print(f"An error occurred while exporting data: {e}")
 
     def log_http_request(self, endpoint, method, status_code, ip_address, timestamp):
         """Log HTTP request details."""
