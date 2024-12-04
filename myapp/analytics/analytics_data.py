@@ -3,6 +3,7 @@ import random
 from datetime import datetime, timezone
 import requests
 import csv
+import os
 
 class AnalyticsData:
     """
@@ -10,16 +11,54 @@ class AnalyticsData:
     Declare more variables to hold analytics tables.
     """
     def __init__(self):
-        self.fact_clicks = dict([]) # statistics table 1 - dictionary with the click counters: key = doc id | value = click counter
-        self.fact_session = dict([]) # statistics table 2
-        self.fact_request = dict([]) # statistics table 3
+        self.fact_clicks = dict([]) # dictionary with the click counters: key = doc id | value = click counter: int
+        self.fact_request = dict([]) # dictionary with the query requests: key = query terms | value = times requested: int
         self.search_id_to_query = dict([]) # util dictionary to map query terms to request id
-        self.dwell_times = dict([]) 
-        self.fact_sessions = dict([])
-        self.doc_to_queries = dict([])
+        self.dwell_times = dict([]) # dictionary with the dwell times: key = doc id | value = dwell time: float
+        self.fact_sessions = dict([]) # dictionary with the session data: key = session id | value = session user: SessionUser
+        self.doc_to_queries = dict([]) # dictionary with the queries for each doc: key = doc id | value = unique queries: list
+        self.http_requests = dict([])  # dictionary with the http requests: key = request id | value = request details: (endpoint, method, status_code, ip_address, timestamp)
+    
+    def export_to_different_csv(self, folder="analytics_exports"):
+        """
+        Exports analytics data to separate CSV files, one for each dictionary.
+        :param folder: Folder where the CSV files will be saved.
+        """
+        try:
+            # Create the folder if it doesn't exist
+            os.makedirs(folder, exist_ok=True)
 
-        # New attributes for HTTP analytics
-        self.http_requests = dict([])  # Tracks HTTP request data: key = request ID | value = request details
+            # Export each dictionary to a separate CSV file
+            self._export_dict_to_csv(self.fact_clicks, os.path.join(folder, "fact_clicks.csv"))
+            self._export_dict_to_csv(self.fact_request, os.path.join(folder, "fact_request.csv"))
+            self._export_dict_to_csv(self.search_id_to_query, os.path.join(folder, "search_id_to_query.csv"))
+            self._export_dict_to_csv(self.dwell_times, os.path.join(folder, "dwell_times.csv"))
+            self._export_dict_to_csv(self.doc_to_queries, os.path.join(folder, "doc_to_queries.csv"))
+            self._export_dict_to_csv(self.http_requests, os.path.join(folder, "http_requests.csv"))
+
+            # Handle fact_sessions separately since it requires serialization
+            fact_sessions_file = os.path.join(folder, "fact_sessions.csv")
+            with open(fact_sessions_file, mode="w", newline="", encoding="utf-8") as file:
+                writer = csv.writer(file)
+                writer.writerow(["Session ID", "Session Data"])
+                for session_id, session_user in self.fact_sessions.items():
+                    writer.writerow([session_id, json.dumps(session_user.to_dict())])
+
+            print(f"Analytics data successfully exported to folder: {folder}")
+        except Exception as e:
+            print(f"An error occurred while exporting data: {e}")
+
+    def _export_dict_to_csv(self, data_dict, filename):
+        """
+        Helper method to export a dictionary to a CSV file.
+        :param data_dict: The dictionary to export.
+        :param filename: The file path for the CSV.
+        """
+        with open(filename, mode="w", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow(["Key", "Value"])  # Write header
+            for key, value in data_dict.items():
+                writer.writerow([key, value])
     
     def export_to_csv(self, filename="analytics_data.csv"):
         """
